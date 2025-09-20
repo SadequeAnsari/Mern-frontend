@@ -20,7 +20,7 @@ const SetUserId = () => {
       return;
     }
     setLoading(true);
-    const response = await fetch("https://mern-backend-topaz.vercel.app/set-userid", {
+    const response = await fetch("https://mern-backend-two-mu.vercel.app/set-userid", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, userid }),

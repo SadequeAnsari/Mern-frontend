@@ -10,7 +10,7 @@ const UserProfile = () => {
     // Fetch user profile from backend
     const fetchProfile = async () => {
       try {
-        const response = await fetch("https://mern-backend-topaz.vercel.app/profile", {
+        const response = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
           method: "GET",
           credentials: "include", // send cookies
         });

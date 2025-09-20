@@ -10,7 +10,7 @@ const VerifyEmail = () => {
     const fetchLevel5Users = async () => {
       try {
         const response = await fetch(
-          "https://mern-backend-topaz.vercel.app/api/users/level/5",
+          "https://mern-backend-two-mu.vercel.app/api/users/level/5",
           {
             credentials: "include",
           }
@@ -42,7 +42,7 @@ const VerifyEmail = () => {
     setGeneratedCode("");
     try {
       const response = await fetch(
-        "https://mern-backend-topaz.vercel.app/api/verification/request",
+        "https://mern-backend-two-mu.vercel.app/api/verification/request",
         {
           method: "POST",
           credentials: "include",

@@ -126,7 +126,7 @@ const Home = () => {
 
   const fetchAllPosts = async () => {
     try {
-      const postsResponse = await fetch("https://mern-backend-topaz.vercel.app/posts", {
+      const postsResponse = await fetch("https://mern-backend-two-mu.vercel.app/posts", {
         method: "GET",
         credentials: "include",
       });
@@ -143,7 +143,7 @@ const Home = () => {
   const fetchBookmarkedPosts = async () => {
     try {
       const bookmarksResponse = await fetch(
-        "https://mern-backend-topaz.vercel.app/api/bookmarks",
+        "https://mern-backend-two-mu.vercel.app/api/bookmarks",
         {
           method: "GET",
           credentials: "include", // if using cookies for auth
@@ -165,7 +165,7 @@ const Home = () => {
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
       try {
-        const profileResponse = await fetch("https://mern-backend-topaz.vercel.app/profile", {
+        const profileResponse = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
           method: "GET",
           credentials: "include",
         });
@@ -198,7 +198,7 @@ const Home = () => {
       )
     ) {
       try {
-        const response = await fetch("https://mern-backend-topaz.vercel.app/delete-account", {
+        const response = await fetch("https://mern-backend-two-mu.vercel.app/delete-account", {
           method: "PATCH",
           credentials: "include",
         });
@@ -229,7 +229,7 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch("https://mern-backend-topaz.vercel.app/create-post", {
+      const response = await fetch("https://mern-backend-two-mu.vercel.app/create-post", {
         method: "POST",
         credentials: "include",
         headers: {
@@ -256,7 +256,7 @@ const Home = () => {
   const handleDeletePost = async (postId) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
-        const response = await fetch(`https://mern-backend-topaz.vercel.app/posts/${postId}`, {
+        const response = await fetch(`https://mern-backend-two-mu.vercel.app/posts/${postId}`, {
           method: "DELETE",
           credentials: "include",
         });
@@ -288,7 +288,7 @@ const Home = () => {
 
     try {
       const response = await fetch(
-        `https://mern-backend-topaz.vercel.app/posts/${editingPost._id}`,
+        `https://mern-backend-two-mu.vercel.app/posts/${editingPost._id}`,
         {
           method: "PUT",
           credentials: "include",
@@ -325,7 +325,7 @@ const Home = () => {
   const handleBookmarkPost = async (postId) => {
     try {
       const response = await fetch(
-        `https://mern-backend-topaz.vercel.app/api/bookmarks/${postId}`,
+        `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
         {
           method: "POST",
           credentials: "include",
@@ -419,7 +419,7 @@ const Home = () => {
           <button
             className="px-3 py-2 rounded text-white bg-red-600 hover:text-red-600 hover:border-red-600 border hover:bg-gray-200 cursor-pointer transition"
             onClick={async () => {
-              await fetch("https://mern-backend-topaz.vercel.app/logout", {
+              await fetch("https://mern-backend-two-mu.vercel.app/logout", {
                 method: "POST",
                 credentials: "include",
               });
@@ -485,7 +485,7 @@ const Home = () => {
               <button
                 className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
                 onClick={async () => {
-                  await fetch("https://mern-backend-topaz.vercel.app/logout", {
+                  await fetch("https://mern-backend-two-mu.vercel.app/logout", {
                     method: "POST",
                     credentials: "include",
                   });

@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     // Check authentication by requesting profile or token
-    fetch("https://mern-backend-topaz.vercel.app/profile", {
+    fetch("https://mern-backend-two-mu.vercel.app/profile", {
       method: "GET",
       credentials: "include",
     })

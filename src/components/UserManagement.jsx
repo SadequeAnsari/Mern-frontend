@@ -13,7 +13,7 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("https://mern-backend-topaz.vercel.app/api/users", {
+      const response = await fetch("https://mern-backend-two-mu.vercel.app/api/users", {
         method: "GET",
         credentials: "include",
       });
@@ -41,7 +41,7 @@ const UserManagement = () => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await fetch("https://mern-backend-topaz.vercel.app/profile", {
+      const response = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
         method: "GET",
         credentials: "include",
       });
@@ -62,7 +62,7 @@ const UserManagement = () => {
   const handleLevelChange = async (userId, newLevel) => {
     try {
       const response = await fetch(
-        `https://mern-backend-topaz.vercel.app/api/users/${userId}/level`,
+        `https://mern-backend-two-mu.vercel.app/api/users/${userId}/level`,
         {
           method: "PUT",
           credentials: "include",
@@ -98,7 +98,7 @@ const UserManagement = () => {
     setUserToVerify(null);
     try {
       const response = await fetch(
-        "https://mern-backend-topaz.vercel.app/api/verification/check-code",
+        "https://mern-backend-two-mu.vercel.app/api/verification/check-code",
         {
           method: "POST",
           credentials: "include",
@@ -137,7 +137,7 @@ const UserManagement = () => {
     setMessage("");
     try {
       const response = await fetch(
-        "https://mern-backend-topaz.vercel.app/api/verification/action",
+        "https://mern-backend-two-mu.vercel.app/api/verification/action",
         {
           method: "POST",
           credentials: "include",

@@ -16,7 +16,7 @@ const Signup = () => {
       alert("Passwords do not match!");
       return;
     }
-    const response = await fetch("https://mern-backend-topaz.vercel.app/register", {
+    const response = await fetch("https://mern-backend-two-mu.vercel.app/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, phone, email, password }),

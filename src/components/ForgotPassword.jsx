@@ -11,7 +11,7 @@ const ForgotPassword = () => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setMessage("");
-    const response = await fetch("https://mern-backend-topaz.vercel.app/forgot-password", {
+    const response = await fetch("https://mern-backend-two-mu.vercel.app/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
@@ -27,7 +27,7 @@ const ForgotPassword = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setMessage("");
-    const response = await fetch("https://mern-backend-topaz.vercel.app/reset-password", {
+    const response = await fetch("https://mern-backend-two-mu.vercel.app/reset-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp, newPassword }),

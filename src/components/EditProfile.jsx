@@ -8,7 +8,7 @@ const EditProfile = () => {
   useEffect(() => {
     // Fetch current user profile
     const fetchProfile = async () => {
-      const response = await fetch("https://mern-backend-topaz.vercel.app/profile", {
+      const response = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
         method: "GET",
         credentials: "include",
       });
@@ -40,7 +40,7 @@ const EditProfile = () => {
                 alert("User ID must start with @");
                 return;
               }
-              const response = await fetch("https://mern-backend-topaz.vercel.app/profile", {
+              const response = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
