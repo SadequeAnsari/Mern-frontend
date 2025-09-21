@@ -121,6 +121,8 @@ const Home = () => {
   const [editingPost, setEditingPost] = useState(null);
   const [isBookmarksView, setIsBookmarksView] = useState(false);
   const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+  const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -371,72 +373,136 @@ const Home = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <aside className="w-64 bg-white shadow flex flex-col items-center py-8">
-        <div className="mb-6 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-700">
-            {user.username[0].toUpperCase()}
-          </div>
-          <div className="text-center text-2xl font-semibold">
-            {user.username}
-          </div>
-          <div className="text-sm text-gray-500 text-center">{user.email}</div>
-          <button
-            className="mt-4 px-2 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition"
-            onClick={() => navigate("/edit-profile")}
-          >
-            Edit Profile
-          </button>
-          {parseInt(user.level) < 1 && (
+      
+      <div className="relative flex min-h-screen bg-gray-50 md:flex-row flex-col">
+      {/* Mobile Menu Button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-white shadow-md"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 6h16M4 12h16M4 18h16"
+          />
+        </svg>
+      </button>
+
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex flex-col items-center py-8 h-full">
+          <div className="mb-6 flex flex-col items-center">
+            <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-700">
+              {user.username[0].toUpperCase()}
+            </div>
+            <div className="text-center text-2xl font-semibold">
+              {user.username}
+            </div>
+            <div className="text-sm text-gray-500 text-center">
+              {user.email}
+            </div>
             <button
-              className="px-2 py-2 mt-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600 transition"
-              onClick={() => navigate("/verify-email")}
+              className="mt-4 px-2 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition"
+              onClick={() => navigate("/edit-profile")}
             >
-              Get Verified
+              Edit Profile
             </button>
-          )}
-        </div>
-        <nav className="flex mt-35 flex-col gap-2 w-full px-4">
-          <button
-            className="px-3 py-2 rounded hover:bg-gray-200 transition"
-            onClick={() => navigate("/user-profile")}
-          >
-            Profile
-          </button>
-          <button
-            className="px-3 py-2 rounded hover:bg-gray-200 transition"
-            onClick={() => navigate("/settings")}
-          >
-            Settings
-          </button>
-          {parseInt(user.level) >= 2 && (
+            {parseInt(user.level) < 1 && (
+              <button
+                className="px-2 py-2 mt-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600 transition"
+                onClick={() => navigate("/verify-email")}
+              >
+                Get Verified
+              </button>
+            )}
+          </div>
+
+          <nav className="flex mt-55 flex-col gap-2 w-full px-4">
             <button
               className="px-3 py-2 rounded hover:bg-gray-200 transition"
-              onClick={() => navigate("/user-management")}
+              onClick={() => navigate("/user-profile")}
             >
-              User Management
+              Profile
             </button>
-          )}
-          <button
-            className="px-3 py-2 rounded text-white bg-red-600 hover:text-red-600 hover:border-red-600 border hover:bg-gray-200 cursor-pointer transition"
-            onClick={async () => {
-              await fetch("https://mern-backend-two-mu.vercel.app/logout", {
-                method: "POST",
-                credentials: "include",
-              });
-              setUser(null);
-              navigate("/login");
-            }}
-          >
-            Logout
-          </button>
-          <button
-            onClick={handleDeleteAccount}
-            className="w-full py-2 px-4 bg-red-500 text-white font-bold rounded hover:bg-red-600 transition cursor-pointer"
-          >
-            Delete Account
-          </button>
-        </nav>
+            <div className="relative">
+              <button
+                className="w-full px-3 py-2 rounded hover:bg-gray-200 transition"
+                onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+              >
+                Settings
+              </button>
+              {isSettingsMenuOpen && (
+                <div className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                  <button
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                    onClick={() => {
+                      setIsSettingsMenuOpen(false);
+                      navigate("/edit-profile");
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  {parseInt(user.level) >= 2 && (
+                    <button
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                      onClick={() => {
+                        setIsSettingsMenuOpen(false);
+                        navigate("/user-management");
+                      }}
+                    >
+                      User Management
+                    </button>
+                  )}
+                  <button
+                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                    onClick={async () => {
+                      await fetch(
+                        "https://mern-backend-two-mu.vercel.app/logout",
+                        {
+                          method: "POST",
+                          credentials: "include",
+                        }
+                      );
+                      setIsSettingsMenuOpen(false);
+                      setUser(null);
+                      navigate("/login");
+                    }}
+                  >
+                    Logout
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 bg-red-500 text-white font-bold rounded-b-lg hover:bg-red-600 transition cursor-pointer"
+                    onClick={handleDeleteAccount}
+                  >
+                    Delete Account
+                  </button>
+                </div>
+              )}
+            </div>
+          </nav>
+        </div>
       </aside>
+      </div>
 
       <main className="flex-1 flex flex-col relative p-8 overflow-y-auto">
         <div className="absolute top-6 right-8">
@@ -467,15 +533,7 @@ const Home = () => {
               >
                 Edit Profile
               </button>
-              <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                onClick={() => {
-                  setMenuOpen(false);
-                  navigate("/settings");
-                }}
-              >
-                Settings
-              </button>
+              
               <button
                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                 onClick={handleViewBookmarks}
