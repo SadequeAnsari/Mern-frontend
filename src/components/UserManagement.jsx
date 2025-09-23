@@ -176,7 +176,7 @@ const UserManagement = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center">Loading user data...</div>;
+    return <div className="p-8 text-center">Loading Please wait...</div>;
   }
 
   return (

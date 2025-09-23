@@ -1,8 +1,39 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor }) => {
+const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor ,  isBookmarked }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+    // Bookmark icon and text based on isBookmarked prop
+  const bookmarkIcon = isBookmarked ? (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+    >
+      <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+    </svg>
+  ) : (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-5 w-5"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M5 5a2 2 0 012-2h6a2 2 0 012 2v16l-7-3.5L5 21V5z"
+      />
+    </svg>
+  );
+
+  const bookmarkText = isBookmarked ? "Unbookmark" : "Bookmark";
+  const bookmarkColor = isBookmarked ? "text-blue-500" : "text-gray-600";
+
 
   return (
     <div key={post._id} className="bg-white p-6 rounded-lg shadow-md">
@@ -73,9 +104,9 @@ const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor }) => {
       <p className="text-gray-800">{post.content}</p>
 
       {/* Social interaction icons */}
-      <div className="flex items-center space-x-4 mt-4">
+      {/* <div className="flex items-center space-x-4 mt-4"> */}
         {/* Bookmark Icon */}
-        <button
+        {/* <button
           onClick={() => onBookmark(post._id)}
           className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition"
         >
@@ -88,6 +119,36 @@ const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor }) => {
             <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
           </svg>
           <span>Bookmark</span>
+        </button> */}
+
+        {/* Share Icon */}
+        {/* <button
+          onClick={() => onShare(post)}
+          className="flex items-center space-x-1 text-gray-600 hover:text-yellow-500 transition"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M15 8a3 3 0 10-2.977-2.7L5.584 8.412a3.001 3.001 0 000 3.176l6.439 3.189a3 3 0 10.896-1.785L8.216 10.3a3.001 3.001 0 000-2.6z" />
+          </svg>
+          <span>Share</span>
+        </button>
+      </div>
+    </div>
+  );
+}; */}
+      {/* Social interaction icons */}
+      <div className="flex items-center space-x-4 mt-4">
+        {/* Bookmark Icon */}
+        <button
+          onClick={() => onBookmark(post._id)}
+          className={`flex items-center space-x-1 hover:text-blue-500 transition ${bookmarkColor}`}
+        >
+          {bookmarkIcon}
+          <span>{bookmarkText}</span>
         </button>
 
         {/* Share Icon */}
@@ -319,35 +380,73 @@ const Home = () => {
     }
   };
 
-  const handleShare = (post) => {
-    console.log(`Shared post with ID: ${post._id}`);
-    // Future: Implement sharing functionality (e.g., copy link, share to social media).
-  };
+ 
+ const handleBookmarkPost = async (postId) => {
+  const isPostBookmarked = bookmarkedPosts.some((bookmark) => bookmark._id === postId);
 
-  const handleBookmarkPost = async (postId) => {
+  if (isPostBookmarked) {
+    // Remove bookmark
     try {
-      const response = await fetch(
-        `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
-        {
-          method: "POST",
-          credentials: "include",
-        }
-      );
+      const response = await fetch(`https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
-      const data = await response.json();
       if (response.ok) {
-        alert("Post bookmarked successfully!");
-        // Re-fetch bookmarked posts to update the state
-        if (isBookmarksView) {
+        setBookmarkedPosts(bookmarkedPosts.filter((bookmark) => bookmark._id !== postId));
+        alert("Bookmark removed!");
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to remove bookmark:", response.status, errorText);
+        alert(`Failed to remove bookmark. Server responded with status: ${response.status}`);
+      }
+    } catch (error) {
+      console.error("Error removing bookmark:", error);
+      alert("An error occurred while removing the bookmark.");
+    }
+  } else {
+    // Add bookmark
+    try {
+      const response = await fetch(`https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`, { // Corrected URL here
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ postId }),
+      });
+
+      if (response.ok) {
+        const postToAdd = posts.find(post => post._id === postId);
+        if (postToAdd) {
+          setBookmarkedPosts([...bookmarkedPosts, postToAdd]);
+          alert("Post bookmarked!");
+        } else {
+          alert("Post bookmarked successfully, but failed to update the list.");
           fetchBookmarkedPosts();
         }
       } else {
-        alert(data.message || "Failed to bookmark post.");
+        const errorText = await response.text();
+        console.error("Failed to add bookmark:", response.status, errorText);
+        alert(`Failed to add bookmark. Server responded with status: ${response.status}`);
       }
     } catch (error) {
-      console.error("Error bookmarking post:", error);
-      alert("An error occurred while bookmarking the post.");
+      console.error("Error adding bookmark:", error);
+      alert("An error occurred while adding the bookmark.");
     }
+  }
+};
+
+  const handleShare = (post) => {
+    navigator.clipboard
+      .writeText(`${window.location.origin}/posts/${post._id}`)
+      .then(() => {
+        alert("Post link copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy link: ", err);
+        alert("Failed to copy link.");
+      });
   };
 
   const handleViewBookmarks = () => {
@@ -669,6 +768,7 @@ const Home = () => {
                   onShare={handleShare}
                   onBookmark={handleBookmarkPost}
                   isAuthor={user && post.author && post.author._id === user._id}
+                   isBookmarked={true} 
                 />
               ))
             ) : (
@@ -684,6 +784,7 @@ const Home = () => {
                 onEdit={handleEditPost}
                 onBookmark={handleBookmarkPost}
                 isAuthor={user && post.author && post.author._id === user._id}
+                isBookmarked={bookmarkedPosts.some((bookmark) => bookmark._id === post._id)}
               />
             ))
           ) : (
