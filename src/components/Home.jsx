@@ -7,28 +7,20 @@ const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor ,  isBookm
     // Bookmark icon and text based on isBookmarked prop
   const bookmarkIcon = isBookmarked ? (
     <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-    </svg>
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+          </svg>
   ) : (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-5 w-5"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
+   <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="15" viewBox="0 0 48 48" fill="none"
+      stroke="currentColor">
+<path strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth={2}
-        d="M5 5a2 2 0 012-2h6a2 2 0 012 2v16l-7-3.5L5 21V5z"
-      />
-    </svg>
+        strokeWidth={2} d="M 15 3 C 12.250484 3 10 5.2504839 10 8 L 10 45 A 1.0001 1.0001 0 0 0 11.609375 45.792969 L 25.904297 34.796875 A 1.0006638 1.0006638 0 1 0 24.683594 33.210938 L 12 42.96875 L 12 8 C 12 6.3315161 13.331516 5 15 5 L 33 5 C 34.668484 5 36 6.3315161 36 8 L 36 42.96875 L 27.681641 36.570312 A 1.0001 1.0001 0 1 0 26.462891 38.15625 L 36.390625 45.792969 A 1.0001 1.0001 0 0 0 38 45 L 38 8 C 38 5.2504839 35.749516 3 33 3 L 15 3 z"></path>
+</svg>
   );
 
   const bookmarkText = isBookmarked ? "Unbookmark" : "Bookmark";
@@ -103,43 +95,7 @@ const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor ,  isBookm
       </div>
       <p className="text-gray-800">{post.content}</p>
 
-      {/* Social interaction icons */}
-      {/* <div className="flex items-center space-x-4 mt-4"> */}
-        {/* Bookmark Icon */}
-        {/* <button
-          onClick={() => onBookmark(post._id)}
-          className="flex items-center space-x-1 text-gray-600 hover:text-blue-500 transition"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-          </svg>
-          <span>Bookmark</span>
-        </button> */}
-
-        {/* Share Icon */}
-        {/* <button
-          onClick={() => onShare(post)}
-          className="flex items-center space-x-1 text-gray-600 hover:text-yellow-500 transition"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M15 8a3 3 0 10-2.977-2.7L5.584 8.412a3.001 3.001 0 000 3.176l6.439 3.189a3 3 0 10.896-1.785L8.216 10.3a3.001 3.001 0 000-2.6z" />
-          </svg>
-          <span>Share</span>
-        </button>
-      </div>
-    </div>
-  );
-}; */}
+      
       {/* Social interaction icons */}
       <div className="flex items-center space-x-4 mt-4">
         {/* Bookmark Icon */}
@@ -380,7 +336,7 @@ const Home = () => {
     }
   };
 
- 
+
  const handleBookmarkPost = async (postId) => {
   const isPostBookmarked = bookmarkedPosts.some((bookmark) => bookmark._id === postId);
 
