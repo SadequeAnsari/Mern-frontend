@@ -111,7 +111,7 @@ const handleUsernameClick = (authorId) => {
 
             <span className="ml-4 px-2 py-0.5 text-xs font-medium rounded-full 
              bg-yellow-100 text-yellow-800 border border-yellow-300">
-            {post.statusCode === '1' ? 'Published' : 'Draft'}
+            {post.statusCode === '2' ? 'Published' : 'Draft'}
         </span>
           </p>
         </div>
