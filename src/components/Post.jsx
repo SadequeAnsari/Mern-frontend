@@ -10,6 +10,7 @@ const Post = ({
   isAuthor,
   isBookmarked,
   userLevel,
+  onWithdraw, // <--- NEW PROP for the withdraw action
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -21,17 +22,22 @@ const handleUsernameClick = (authorId) => {
     }
   };
 
-// 1. Determine if the current user can delete this post
-  // User can delete if: they are the author OR their level is 7 or greater.
-  const canDelete = isAuthor || parseInt(userLevel) >= 7;
+// 1. Determine Post Status
+  const isPublished = post.statusCode === '2'; // Post is published if status is '1'
 
-  // 2. Determine if the current user can edit this post (only the author can edit)
-  const canEdit = isAuthor;
+// 2. Determine if the current user can delete this post
+  // User can delete if: they are the author AND the post is NOT published OR they have admin rights (Level >= 7).
+  const canDelete = (!isPublished && isAuthor) || parseInt(userLevel) >= 7;
 
-  // 3. Determine if the three-dots menu should be shown (based on previous request)
-  // Show if: level is not 0 AND (canEdit OR canDelete OR canReport)
+// 3. Determine if the current user can edit this post (only the author can edit a DRAFT post)
+  const canEdit = isAuthor && !isPublished;
+
+// 4. Determine if the 'Withdraw' option should be shown (Author only for PUBLISHED posts)
+  const canWithdraw = isAuthor && isPublished; // NEW LOGIC
+
+  // 5. Determine if the three-dots menu should be shown
   const showReportOption = !isAuthor && parseInt(userLevel) >= 1;
-  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || showReportOption); 
+  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || canWithdraw || showReportOption); // Include canWithdraw 
 
 
  const handleReportPost = () => {
@@ -109,9 +115,9 @@ const handleUsernameClick = (authorId) => {
               hour12: true,
             })}
 
-            <span className="ml-4 px-2 py-0.5 text-xs font-medium rounded-full 
-             bg-yellow-100 text-yellow-800 border border-yellow-300">
-            {post.statusCode === '2' ? 'Published' : 'Draft'}
+            <span className={`ml-4 px-2 py-0.5 text-xs font-medium rounded-full 
+             ${isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-yellow-100 text-yellow-800 border border-yellow-300'}`}>
+            {isPublished ? 'Published' : 'Draft'} {/* Updated text to reflect status */}
         </span>
           </p>
         </div>
@@ -136,7 +142,7 @@ const handleUsernameClick = (authorId) => {
             {menuOpen && (
       <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               
-              {/* Option for Author (Edit) */}
+              {/* Option for Author (Edit) - ONLY shown if NOT published */}
               {canEdit && (
                 <button
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -149,7 +155,21 @@ const handleUsernameClick = (authorId) => {
                 </button>
               )}
 
-              {/* Option for Deleting (Author OR Level >= 7) */}
+              {/* NEW: Option for Author (Withdraw) - ONLY shown if IS published */}
+              {canWithdraw && (
+                <button
+                  className="block w-full text-left px-4 py-2 text-yellow-600 hover:bg-gray-100"
+                  onClick={() => {
+                    if (onWithdraw) onWithdraw(post._id);
+                    setMenuOpen(false);
+                  }}
+                >
+                  Withdraw
+                </button>
+              )}
+
+
+              {/* Option for Deleting (Author - only Drafts OR Admin) */}
               {canDelete && (
                 <button
                   className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
