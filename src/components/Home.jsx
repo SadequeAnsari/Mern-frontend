@@ -1,131 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-const Post = ({ post, onShare, onDelete, onEdit, onBookmark, isAuthor ,  isBookmarked }) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-
-    // Bookmark icon and text based on isBookmarked prop
-  const bookmarkIcon = isBookmarked ? (
-    <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-          </svg>
-  ) : (
-   <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="15" viewBox="0 0 48 48" fill="none"
-      stroke="currentColor">
-<path strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2} d="M 15 3 C 12.250484 3 10 5.2504839 10 8 L 10 45 A 1.0001 1.0001 0 0 0 11.609375 45.792969 L 25.904297 34.796875 A 1.0006638 1.0006638 0 1 0 24.683594 33.210938 L 12 42.96875 L 12 8 C 12 6.3315161 13.331516 5 15 5 L 33 5 C 34.668484 5 36 6.3315161 36 8 L 36 42.96875 L 27.681641 36.570312 A 1.0001 1.0001 0 1 0 26.462891 38.15625 L 36.390625 45.792969 A 1.0001 1.0001 0 0 0 38 45 L 38 8 C 38 5.2504839 35.749516 3 33 3 L 15 3 z"></path>
-</svg>
-  );
-
-  const bookmarkText = isBookmarked ? "Unbookmark" : "Bookmark";
-  const bookmarkColor = isBookmarked ? "text-blue-500" : "text-gray-600";
-
-
-  return (
-    <div key={post._id} className="bg-white p-6 rounded-lg shadow-md">
-      <div className="flex items-center space-x-4 mb-4">
-        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-          {/* {post.author ? post.author.username[0].toUpperCase() : "A"} \\\\ */}
-          {post.author && post.author.username ? post.author.username[0].toUpperCase() : "A"}
-        </div>
-        <div className="flex-grow">
-          <h4 className="font-semibold text-gray-900">
-            {/* {post.author ? post.author.username : "Anonymous"}  */}
-            {post.author && post.author.username ? post.author.username : "Anonymous"}
-          </h4>
-          <p className="text-sm text-gray-500">
-            {new Date(post.createdAt).toLocaleString("en-US", {
-              year: "numeric",
-              month: "numeric",
-              day: "numeric",
-              hour: "numeric",
-              minute: "numeric",
-              hour12: true,
-            })}
-          </p>
-        </div>
-        {isAuthor && (
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-full hover:bg-gray-200 transition"
-              aria-label="Post menu"
-            >
-              <svg
-                width="24"
-                height="24"
-                fill="currentColor"
-                className="text-gray-600"
-              >
-                <circle cy="5" cx="12" r="2" />
-                <circle cy="12" cx="12" r="2" />
-                <circle cy="19" cx="12" r="2" />
-              </svg>
-            </button>
-            {menuOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
-                <button
-                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                  onClick={() => {
-                    if (onEdit) onEdit(post);
-                    setMenuOpen(false);
-                  }}
-                >
-                  Edit
-                </button>
-                <button
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
-                  onClick={() => {
-                    if (onDelete) onDelete(post._id);
-                    setMenuOpen(false);
-                  }}
-                >
-                  Delete
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <p className="text-gray-800">{post.content}</p>
-
-      
-      {/* Social interaction icons */}
-      <div className="flex items-center space-x-4 mt-4">
-        {/* Bookmark Icon */}
-        <button
-          onClick={() => onBookmark(post._id)}
-          className={`flex items-center space-x-1 hover:text-blue-500 transition ${bookmarkColor}`}
-        >
-          {bookmarkIcon}
-          <span>{bookmarkText}</span>
-        </button>
-
-        {/* Share Icon */}
-        <button
-          onClick={() => onShare(post)}
-          className="flex items-center space-x-1 text-gray-600 hover:text-yellow-500 transition"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M15 8a3 3 0 10-2.977-2.7L5.584 8.412a3.001 3.001 0 000 3.176l6.439 3.189a3 3 0 10.896-1.785L8.216 10.3a3.001 3.001 0 000-2.6z" />
-          </svg>
-          <span>Share</span>
-        </button>
-      </div>
-    </div>
-  );
-};
+import Post from "./Post"; 
 
 const Home = () => {
   const [user, setUser] = useState(null);
@@ -145,10 +20,13 @@ const Home = () => {
 
   const fetchAllPosts = async () => {
     try {
-      const postsResponse = await fetch("https://mern-backend-two-mu.vercel.app/posts", {
-        method: "GET",
-        credentials: "include",
-      });
+      const postsResponse = await fetch(
+        "https://mern-backend-two-mu.vercel.app/posts",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
       if (postsResponse.ok) {
         const postsData = await postsResponse.json();
@@ -184,10 +62,13 @@ const Home = () => {
   useEffect(() => {
     const fetchProfileAndPosts = async () => {
       try {
-        const profileResponse = await fetch("https://mern-backend-two-mu.vercel.app/profile", {
-          method: "GET",
-          credentials: "include",
-        });
+        const profileResponse = await fetch(
+          "https://mern-backend-two-mu.vercel.app/profile",
+          {
+            method: "GET",
+            credentials: "include",
+          }
+        );
 
         if (profileResponse.ok) {
           const data = await profileResponse.json();
@@ -217,10 +98,13 @@ const Home = () => {
       )
     ) {
       try {
-        const response = await fetch("https://mern-backend-two-mu.vercel.app/delete-account", {
-          method: "PATCH",
-          credentials: "include",
-        });
+        const response = await fetch(
+          "https://mern-backend-two-mu.vercel.app/delete-account",
+          {
+            method: "PATCH",
+            credentials: "include",
+          }
+        );
 
         if (response.ok) {
           alert("Your account has been deleted.");
@@ -248,14 +132,17 @@ const Home = () => {
     }
 
     try {
-      const response = await fetch("https://mern-backend-two-mu.vercel.app/create-post", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ content: postContent }),
-      });
+      const response = await fetch(
+        "https://mern-backend-two-mu.vercel.app/create-post",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content: postContent }),
+        }
+      );
 
       if (response.ok) {
         const newPost = await response.json();
@@ -275,10 +162,13 @@ const Home = () => {
   const handleDeletePost = async (postId) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
-        const response = await fetch(`https://mern-backend-two-mu.vercel.app/posts/${postId}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/posts/${postId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
 
         if (response.ok) {
           setPosts(posts.filter((post) => post._id !== postId));
@@ -336,62 +226,82 @@ const Home = () => {
     }
   };
 
+  const handleBookmarkPost = async (postId) => {
+    const isPostBookmarked = bookmarkedPosts.some(
+      (bookmark) => bookmark._id === postId
+    );
 
- const handleBookmarkPost = async (postId) => {
-  const isPostBookmarked = bookmarkedPosts.some((bookmark) => bookmark._id === postId);
+    if (isPostBookmarked) {
+      // Remove bookmark
+      try {
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
 
-  if (isPostBookmarked) {
-    // Remove bookmark
-    try {
-      const response = await fetch(`https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        setBookmarkedPosts(bookmarkedPosts.filter((bookmark) => bookmark._id !== postId));
-        alert("Bookmark removed!");
-      } else {
-        const errorText = await response.text();
-        console.error("Failed to remove bookmark:", response.status, errorText);
-        alert(`Failed to remove bookmark. Server responded with status: ${response.status}`);
-      }
-    } catch (error) {
-      console.error("Error removing bookmark:", error);
-      alert("An error occurred while removing the bookmark.");
-    }
-  } else {
-    // Add bookmark
-    try {
-      const response = await fetch(`https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`, { // Corrected URL here
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ postId }),
-      });
-
-      if (response.ok) {
-        const postToAdd = posts.find(post => post._id === postId);
-        if (postToAdd) {
-          setBookmarkedPosts([...bookmarkedPosts, postToAdd]);
-          alert("Post bookmarked!");
+        if (response.ok) {
+          setBookmarkedPosts(
+            bookmarkedPosts.filter((bookmark) => bookmark._id !== postId)
+          );
+          alert("Bookmark removed!");
         } else {
-          alert("Post bookmarked successfully, but failed to update the list.");
-          fetchBookmarkedPosts();
+          const errorText = await response.text();
+          console.error(
+            "Failed to remove bookmark:",
+            response.status,
+            errorText
+          );
+          alert(
+            `Failed to remove bookmark. Server responded with status: ${response.status}`
+          );
         }
-      } else {
-        const errorText = await response.text();
-        console.error("Failed to add bookmark:", response.status, errorText);
-        alert(`Failed to add bookmark. Server responded with status: ${response.status}`);
+      } catch (error) {
+        console.error("Error removing bookmark:", error);
+        alert("An error occurred while removing the bookmark.");
       }
-    } catch (error) {
-      console.error("Error adding bookmark:", error);
-      alert("An error occurred while adding the bookmark.");
+    } else {
+      // Add bookmark
+      try {
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
+          {
+            // Corrected URL here
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ postId }),
+          }
+        );
+
+        if (response.ok) {
+          const postToAdd = posts.find((post) => post._id === postId);
+          if (postToAdd) {
+            setBookmarkedPosts([...bookmarkedPosts, postToAdd]);
+            alert("Post bookmarked!");
+          } else {
+            alert(
+              "Post bookmarked successfully, but failed to update the list."
+            );
+            fetchBookmarkedPosts();
+          }
+        } else {
+          const errorText = await response.text();
+          console.error("Failed to add bookmark:", response.status, errorText);
+          alert(
+            `Failed to add bookmark. Server responded with status: ${response.status}`
+          );
+        }
+      } catch (error) {
+        console.error("Error adding bookmark:", error);
+        alert("An error occurred while adding the bookmark.");
+      }
     }
-  }
-};
+  };
 
   const handleShare = (post) => {
     navigator.clipboard
@@ -418,7 +328,9 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="text-3xl my-[16rem] mx-[30rem]">Loading Profile...</div>
+      <div className="text-3xl my-[16rem] mx-[30rem]">
+        Loading Please wait...
+      </div>
     );
   }
 
@@ -428,135 +340,139 @@ const Home = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      
       <div className="relative flex min-h-screen bg-gray-50 md:flex-row flex-col">
-      {/* Mobile Menu Button */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-white shadow-md"
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-full bg-white shadow-md"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 6h16M4 12h16M4 18h16"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+
+        {/* Sidebar Overlay */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
           />
-        </svg>
-      </button>
+        )}
 
-      {/* Sidebar Overlay */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black opacity-50 z-30 md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
-          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        <div className="flex flex-col items-center py-8 h-full">
-          <div className="mb-6 flex flex-col items-center">
-            <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-700">
-              {user.username[0].toUpperCase()}
-            </div>
-            <div className="text-center text-2xl font-semibold">
-              {user.username}
-            </div>
-            <div className="text-sm text-gray-500 text-center">
-              {user.email}
-            </div>
-            <button
-              className="mt-4 px-2 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition"
-              onClick={() => navigate("/edit-profile")}
-            >
-              Edit Profile
-            </button>
-            {parseInt(user.level) < 1 && (
+        {/* Sidebar */}
+        <aside
+          className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-40 transform transition-transform duration-300 ease-in-out md:static md:translate-x-0 ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
+        >
+          <div className="flex flex-col items-center py-8 h-full">
+            <div className="mb-6 flex flex-col items-center">
+              <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-2xl font-bold text-gray-700">
+                {user.username[0].toUpperCase()}
+              </div>
+              <div className="text-center text-2xl font-semibold">
+                {user.username}
+              </div>
+              <div className="text-sm text-gray-500 text-center">
+                {user.email}
+              </div>
+              <div className="text-sm text-gray-500 text-center">
+                Level: {user.level}
+              </div>
               <button
-                className="px-2 py-2 mt-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600 transition"
-                onClick={() => navigate("/verify-email")}
+                className="mt-4 px-2 py-2 bg-blue-500 text-white rounded cursor-pointer hover:bg-blue-600 transition"
+                onClick={() => navigate("/edit-profile")}
               >
-                Get Verified
+                Edit Profile
               </button>
-            )}
-          </div>
+              {parseInt(user.level) < 1 && (
+                <button
+                  className="px-2 py-2 mt-2 bg-purple-500 text-white rounded cursor-pointer hover:bg-purple-600 transition"
+                  onClick={() => navigate("/verify-email")}
+                >
+                  Get Verified
+                </button>
+              )}
+            </div>
 
-          <nav className="flex mt-55 flex-col gap-2 w-full px-4">
-            <button
-              className="px-3 py-2 rounded hover:bg-gray-200 transition"
-              onClick={() => navigate("/user-profile")}
-            >
-              Profile
-            </button>
-            <div className="relative">
+            <nav className="flex mt-55 flex-col gap-2 w-full px-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className=" mr-25 self-center h-9 w-7 absolute" viewBox="0 0 640 640"><path d="M320 312C386.3 312 440 258.3 440 192C440 125.7 386.3 72 320 72C253.7 72 200 125.7 200 192C200 258.3 253.7 312 320 312zM290.3 368C191.8 368 112 447.8 112 546.3C112 562.7 125.3 576 141.7 576L498.3 576C514.7 576 528 562.7 528 546.3C528 447.8 448.2 368 349.7 368L290.3 368z"/></svg>
               <button
-                className="w-full px-3 py-2 rounded hover:bg-gray-200 transition"
-                onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                className="px-3 py-2 rounded hover:bg-gray-200 transition"
+                onClick={() => navigate("/user-profile")}
               >
-                Settings
+                Profile
               </button>
-              {isSettingsMenuOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                    onClick={() => {
-                      setIsSettingsMenuOpen(false);
-                      navigate("/edit-profile");
-                    }}
-                  >
-                    Edit Profile
-                  </button>
-                  {parseInt(user.level) >= 2 && (
+              <div className="relative">
+                <svg xmlns="http://www.w3.org/2000/svg" className=" ml-12 self-center h-9 w-7 absolute" viewBox="0 0 640 640"><path d="M259.1 73.5C262.1 58.7 275.2 48 290.4 48L350.2 48C365.4 48 378.5 58.7 381.5 73.5L396 143.5C410.1 149.5 423.3 157.2 435.3 166.3L503.1 143.8C517.5 139 533.3 145 540.9 158.2L570.8 210C578.4 223.2 575.7 239.8 564.3 249.9L511 297.3C511.9 304.7 512.3 312.3 512.3 320C512.3 327.7 511.8 335.3 511 342.7L564.4 390.2C575.8 400.3 578.4 417 570.9 430.1L541 481.9C533.4 495 517.6 501.1 503.2 496.3L435.4 473.8C423.3 482.9 410.1 490.5 396.1 496.6L381.7 566.5C378.6 581.4 365.5 592 350.4 592L290.6 592C275.4 592 262.3 581.3 259.3 566.5L244.9 496.6C230.8 490.6 217.7 482.9 205.6 473.8L137.5 496.3C123.1 501.1 107.3 495.1 99.7 481.9L69.8 430.1C62.2 416.9 64.9 400.3 76.3 390.2L129.7 342.7C128.8 335.3 128.4 327.7 128.4 320C128.4 312.3 128.9 304.7 129.7 297.3L76.3 249.8C64.9 239.7 62.3 223 69.8 209.9L99.7 158.1C107.3 144.9 123.1 138.9 137.5 143.7L205.3 166.2C217.4 157.1 230.6 149.5 244.6 143.4L259.1 73.5zM320.3 400C364.5 399.8 400.2 363.9 400 319.7C399.8 275.5 363.9 239.8 319.7 240C275.5 240.2 239.8 276.1 240 320.3C240.2 364.5 276.1 400.2 320.3 400z"/></svg>
+                <button
+                  className="w-full px-3 py-2 rounded hover:bg-gray-200 transition"
+                  onClick={() => setIsSettingsMenuOpen(!isSettingsMenuOpen)}
+                >
+                  Settings
+                </button>
+                {isSettingsMenuOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                     <button
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                       onClick={() => {
                         setIsSettingsMenuOpen(false);
-                        navigate("/user-management");
+                        navigate("/edit-profile");
                       }}
                     >
-                      User Management
+                      Edit Profile
                     </button>
-                  )}
-                  <button
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                    onClick={async () => {
-                      await fetch(
-                        "https://mern-backend-two-mu.vercel.app/logout",
-                        {
-                          method: "POST",
-                          credentials: "include",
-                        }
-                      );
-                      setIsSettingsMenuOpen(false);
-                      setUser(null);
-                      navigate("/login");
-                    }}
-                  >
-                    Logout
-                  </button>
-                  <button
-                    className="block w-full text-left px-4 py-2 bg-red-500 text-white font-bold rounded-b-lg hover:bg-red-600 transition cursor-pointer"
-                    onClick={handleDeleteAccount}
-                  >
-                    Delete Account
-                  </button>
-                </div>
-              )}
-            </div>
-          </nav>
-        </div>
-      </aside>
+                    {parseInt(user.level) >= 2 && (
+                      <button
+                        className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                        onClick={() => {
+                          setIsSettingsMenuOpen(false);
+                          navigate("/user-management");
+                        }}
+                      >
+                        User Management
+                      </button>
+                    )}
+                    <button
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                      onClick={async () => {
+                        await fetch(
+                          "https://mern-backend-two-mu.vercel.app/logout",
+                          {
+                            method: "POST",
+                            credentials: "include",
+                          }
+                        );
+                        setIsSettingsMenuOpen(false);
+                        setUser(null);
+                        navigate("/login");
+                      }}
+                    >
+                      Logout
+                    </button>
+                    <button
+                      className="block w-full text-left px-4 py-2 bg-red-500 text-white font-bold rounded-b-lg hover:bg-red-600 transition cursor-pointer"
+                      onClick={handleDeleteAccount}
+                    >
+                      Delete Account
+                    </button>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        </aside>
       </div>
 
       <main className="flex-1 flex flex-col relative p-8 overflow-y-auto">
@@ -578,9 +494,9 @@ const Home = () => {
             </svg>
           </button>
           {menuOpen && (
-            <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+            <div className="absolute text-center right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="block w-full px-4 py-2 hover:bg-gray-100"
                 onClick={() => {
                   setMenuOpen(false);
                   navigate("/edit-profile");
@@ -588,15 +504,16 @@ const Home = () => {
               >
                 Edit Profile
               </button>
-              
+
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="block w-full  px-4 py-2 hover:bg-gray-100"
                 onClick={handleViewBookmarks}
               >
                 Bookmarks
               </button>
+              <svg xmlns="http://www.w3.org/2000/svg" className=" text-red-500 ml-5 h-10 w-6 absolute" fill="currentColor" viewBox="0 0 640 640"><path d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"/></svg>
               <button
-                className="block w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100"
+                className="block w-full  px-4 py-2 text-red-600 hover:bg-gray-100"
                 onClick={async () => {
                   await fetch("https://mern-backend-two-mu.vercel.app/logout", {
                     method: "POST",
@@ -724,7 +641,8 @@ const Home = () => {
                   onShare={handleShare}
                   onBookmark={handleBookmarkPost}
                   isAuthor={user && post.author && post.author._id === user._id}
-                   isBookmarked={true} 
+                  isBookmarked={true}
+                  userLevel={user.level}
                 />
               ))
             ) : (
@@ -735,12 +653,16 @@ const Home = () => {
               <Post
                 key={post._id}
                 post={post}
+                // statusCode={post.statusCode}
                 onShare={handleShare}
                 onDelete={handleDeletePost}
                 onEdit={handleEditPost}
                 onBookmark={handleBookmarkPost}
                 isAuthor={user && post.author && post.author._id === user._id}
-                isBookmarked={bookmarkedPosts.some((bookmark) => bookmark._id === post._id)}
+                isBookmarked={bookmarkedPosts.some(
+                  (bookmark) => bookmark._id === post._id
+                )}
+                userLevel={user.level}
               />
             ))
           ) : (

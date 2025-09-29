@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import ForgotPassword from './components/ForgotPassword'
 import UserProfile from './components/UserProfile'
 import UserManagement from './components/UserManagement'
+import Profile from './components/Profile'
 
 const App = () => {
   
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/user-profile" element={<ProtectedRoute><UserProfile/></ProtectedRoute>} />
         <Route path="/user-management" element={<ProtectedRoute><UserManagement/></ProtectedRoute>} />
+        <Route path="/profile/:userId" element={<Profile />} /> 
       </Routes>
     </BrowserRouter>
     </>
