@@ -9,6 +9,8 @@ const Profile = ({ currentUserId }) => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [bookmarkedPosts, setBookmarkedPosts] = useState([]);
+    
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -28,14 +30,7 @@ const Profile = ({ currentUserId }) => {
                     setProfile(data.userProfile);
                     setPosts(data.posts);
                 } else {
-                    // const errorData = await response.json();
-                    // setError(errorData.message || 'Failed to fetch user profile.');
-
-                    // *** CRITICAL CHANGE HERE ***
-                    // Check if response is not ok (e.g., 404, 500)
-                    // If the server returns HTML instead of JSON, .json() will throw the SyntaxError.
-                    // Instead, read the text, or just assume a generic failure if the server is broken.
-                    
+              
                     const responseText = await response.text();
                     try {
                         // Attempt to parse as JSON if we think it should be JSON (e.g., for 404/403 errors)
@@ -67,6 +62,96 @@ const Profile = ({ currentUserId }) => {
         navigate(-1); // Go back to the previous page
     };
 
+
+const handleShare = (post) => {
+    navigator.clipboard
+      .writeText(`${window.location.origin}/posts/${post._id}`)
+      .then(() => {
+        alert("Post link copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy link: ", err);
+        alert("Failed to copy link.");
+      });
+  };
+
+  const handleBookmarkPost = async (postId) => {
+    const isPostBookmarked = bookmarkedPosts.some(
+      (bookmark) => bookmark._id === postId
+    );
+
+    if (isPostBookmarked) {
+      // Remove bookmark
+      try {
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+        if (response.ok) {
+          setBookmarkedPosts(
+            bookmarkedPosts.filter((bookmark) => bookmark._id !== postId)
+          );
+          alert("Bookmark removed!");
+        } else {
+          const errorText = await response.text();
+          console.error(
+            "Failed to remove bookmark:",
+            response.status,
+            errorText
+          );
+          alert(
+            `Failed to remove bookmark. Server responded with status: ${response.status}`
+          );
+        }
+      } catch (error) {
+        console.error("Error removing bookmark:", error);
+        alert("An error occurred while removing the bookmark.");
+      }
+    } else {
+      // Add bookmark
+      try {
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/api/bookmarks/${postId}`,
+          {
+            // Corrected URL here
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ postId }),
+          }
+        );
+
+        if (response.ok) {
+          const postToAdd = posts.find((post) => post._id === postId);
+          if (postToAdd) {
+            setBookmarkedPosts([...bookmarkedPosts, postToAdd]);
+            alert("Post bookmarked!");
+          } else {
+            alert(
+              "Post bookmarked successfully, but failed to update the list."
+            );
+            fetchBookmarkedPosts();
+          }
+        } else {
+          const errorText = await response.text();
+          console.error("Failed to add bookmark:", response.status, errorText);
+          alert(
+            `Failed to add bookmark. Server responded with status: ${response.status}`
+          );
+        }
+      } catch (error) {
+        console.error("Error adding bookmark:", error);
+        alert("An error occurred while adding the bookmark.");
+      }
+    }
+  };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -96,10 +181,6 @@ const Profile = ({ currentUserId }) => {
             </div>
         );
     }
-
-    // Since this is a view-only profile, we'll keep the Post component interactions simple.
-    // Full logic for bookmarking/sharing should be added here if needed.
-    const noOp = () => alert('Feature disabled in public profile view.');
 
 
     return (
@@ -139,12 +220,14 @@ const Profile = ({ currentUserId }) => {
                         <Post
                             key={post._id}
                             post={post}
-                            onShare={noOp} // No-op for sharing/bookmarking in this simple view
-                            onBookmark={noOp}
+                            onShare={handleShare}
+                            onBookmark={handleBookmarkPost}
                             onDelete={null} // Don't show delete button
                             onEdit={null}   // Don't show edit button
                             isAuthor={false} // User is not viewing their own profile in this context
-                            isBookmarked={false} 
+                            isBookmarked={bookmarkedPosts.some(
+                  (bookmark) => bookmark._id === post._id
+                )}
                         />
                     ))
                 ) : (

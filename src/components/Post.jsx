@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // MODIFIED: Added useEffect and useCallback
 import { useNavigate } from "react-router-dom";
+
+// Define the 3-hour publication delay in milliseconds
+const PUBLISH_DELAY_MS = 3 * 60 * 60 * 1000;
 
 const Post = ({
   post,
@@ -10,10 +13,60 @@ const Post = ({
   isAuthor,
   isBookmarked,
   userLevel,
-  onWithdraw, // <--- NEW PROP for the withdraw action
+  onWithdraw, 
 }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // NEW STATE: To hold the calculated time left string
+  const [timeLeft, setTimeLeft] = useState(''); 
+  
+  // NEW FUNCTION: Calculates time left and updates state
+  const calculateTimeLeft = useCallback(() => {
+    // Only run for pending posts (statusCode '1')
+    if (post.statusCode !== '1' || !post.createdAt) {
+      setTimeLeft('');
+      return;
+    }
+
+    const createdTime = new Date(post.createdAt).getTime();
+    const publishTime = createdTime + PUBLISH_DELAY_MS;
+    const now = Date.now();
+    const distance = publishTime - now;
+
+    if (distance < 0) {
+      // The post should be published by now. 
+      setTimeLeft('Awaiting Publication...'); 
+      return;
+    }
+
+    // Time calculations for hours, minutes and seconds
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    // Format the time string
+    setTimeLeft(`Publishes in ${hours}h ${minutes}m ${seconds}s`);
+
+  }, [post.createdAt, post.statusCode]); // Dependencies for useCallback
+
+  // NEW useEffect: Set up the interval for the countdown
+  useEffect(() => {
+    calculateTimeLeft(); // Initial calculation
+
+    // Only set up the timer if the post is pending
+    if (post.statusCode === '1') {
+        const timer = setInterval(() => {
+            calculateTimeLeft();
+        }, 1000); // Update every second
+
+        // Clear the interval when the component unmounts or dependencies change
+        return () => clearInterval(timer);
+    }
+    // Cleanup function returns nothing if no timer was set
+    return () => {};
+    
+  }, [calculateTimeLeft, post.statusCode]); 
 
 
 const handleUsernameClick = (authorId) => {
@@ -23,21 +76,27 @@ const handleUsernameClick = (authorId) => {
   };
 
 // 1. Determine Post Status
-  const isPublished = post.statusCode === '2'; // Post is published if status is '1'
+const isPublished = post.statusCode === '2'; 
+const isWithdrawn = post.statusCode === '3';
+const isPending = post.statusCode === '1'; 
 
-// 2. Determine if the current user can delete this post
-  // User can delete if: they are the author AND the post is NOT published OR they have admin rights (Level >= 7).
-  const canDelete = (!isPublished && isAuthor) || parseInt(userLevel) >= 7;
 
-// 3. Determine if the current user can edit this post (only the author can edit a DRAFT post)
-  const canEdit = isAuthor && !isPublished;
+  const hasAdminRights = parseInt(userLevel) >= 7;
+  const canAuthorDelete = isAuthor && (post.statusCode === '0' || post.statusCode === '1');
+  const canAdminDeleteOthers = hasAdminRights && !isAuthor && !isWithdrawn;
 
-// 4. Determine if the 'Withdraw' option should be shown (Author only for PUBLISHED posts)
-  const canWithdraw = isAuthor && isPublished; // NEW LOGIC
+  
+  const canDelete = canAuthorDelete || canAdminDeleteOthers;
 
-  // 5. Determine if the three-dots menu should be shown
+
+  const canEdit = isAuthor && post.statusCode === '0' && !isWithdrawn;
+
+  const canWithdraw = isAuthor && isPublished; 
+
+  const canRepost = isAuthor && isWithdrawn;
+
   const showReportOption = !isAuthor && parseInt(userLevel) >= 1;
-  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || canWithdraw || showReportOption); // Include canWithdraw 
+  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || canWithdraw || showReportOption); 
 
 
  const handleReportPost = () => {
@@ -79,12 +138,37 @@ const handleUsernameClick = (authorId) => {
 
   const bookmarkText = isBookmarked ? "Unbookmark" : "Bookmark";
   const bookmarkColor = isBookmarked ? "text-blue-500" : "text-gray-600";
+  
+  // Helper to determine the status text and color
+  const getStatusDisplay = () => {
+    if (isPublished) {
+        return { text: 'Published', className: 'bg-green-100 text-green-800 border border-green-300' };
+    }
+    if (isPending) {
+        return { text: 'Pending', className: 'bg-indigo-100 text-indigo-800 border border-indigo-300' }; 
+    }
+    if (isWithdrawn) {
+        return { text: 'Withdrawn', className: 'bg-red-100 text-red-800 border border-red-300' };
+    }
+    // Default for '0' (Draft)
+    return { text: 'Draft', className: 'bg-yellow-100 text-yellow-800 border border-yellow-300' };
+  };
+  
+  const statusDisplay = getStatusDisplay();
+
 
   return (
-    <div key={post._id} className="bg-white p-6 rounded-lg shadow-md relative">
+    <div 
+        key={post._id} 
+        className={`bg-white p-6 rounded-lg shadow-md relative overflow-hidden 
+          ${isWithdrawn 
+            ? 'after:content-["WITHDRAWN"] after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:rotate-[-30deg] after:text-gray-200 after:text-8xl after:font-black after:pointer-events-none after:z-0' 
+            : ''
+          }
+        `}>
+          
       <div className="flex items-center space-x-4 mb-4">
         <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-          {/* {post.author ? post.author.username[0].toUpperCase() : "A"} \\\\ */}
           {post.author && post.author.username
             ? post.author.username[0].toUpperCase()
             : "A"}
@@ -92,13 +176,12 @@ const handleUsernameClick = (authorId) => {
         <div className="flex-grow">
           <h4 className="font-semibold text-gray-900">
 
-            <button // <--- 4. REPLACE h4 with a clickable button
+            <button 
             onClick={() => 
-                // Defensive check to ensure author and ID exist before clicking
                 post.author && post.author._id && handleUsernameClick(post.author._id)
             }
             className="font-semibold text-gray-900 hover:text-blue-600 hover:underline cursor-pointer transition duration-150"
-            disabled={!post.author || !post.author._id} // Disable if data is missing
+            disabled={!post.author || !post.author._id} 
           >
             {post.author && post.author.username
               ? post.author.username
@@ -114,11 +197,19 @@ const handleUsernameClick = (authorId) => {
               minute: "numeric",
               hour12: true,
             })}
+            
+            {/* Display Status Code */}
+            <span className={`ml-4 px-2 py-0.5 text-xs font-medium rounded-full ${statusDisplay.className}`}>
+                {statusDisplay.text}
+            </span>
+            
+            {/* Display Countdown Timer for Pending Posts */}
+            {isPending && timeLeft && (
+                 <span className="ml-4 px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800 border border-red-300">
+                    {timeLeft}
+                 </span>
+            )}
 
-            <span className={`ml-4 px-2 py-0.5 text-xs font-medium rounded-full 
-             ${isPublished ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-yellow-100 text-yellow-800 border border-yellow-300'}`}>
-            {isPublished ? 'Published' : 'Draft'} {/* Updated text to reflect status */}
-        </span>
           </p>
         </div>
       {showThreeDots && ( 
@@ -142,7 +233,7 @@ const handleUsernameClick = (authorId) => {
             {menuOpen && (
       <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
               
-              {/* Option for Author (Edit) - ONLY shown if NOT published */}
+              {/* Option for Author (Edit) - shown if NOT published */}
               {canEdit && (
                 <button
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100"
@@ -155,7 +246,7 @@ const handleUsernameClick = (authorId) => {
                 </button>
               )}
 
-              {/* NEW: Option for Author (Withdraw) - ONLY shown if IS published */}
+              {/* Option for Author (Withdraw) - shown if IS published */}
               {canWithdraw && (
                 <button
                   className="block w-full text-left px-4 py-2 text-yellow-600 hover:bg-gray-100"
@@ -165,6 +256,18 @@ const handleUsernameClick = (authorId) => {
                   }}
                 >
                   Withdraw
+                </button>
+              )}
+
+              {canRepost && (
+                <button className="block w-full text-left px-4 py-2 text-green-600 hover:bg-gray-100"
+                  onClick={() => {
+                  // Passes a new object: original post details + setting status to Draft ('0') + adding isRepost flag
+                  if (onEdit) onEdit({ ...post, statusCode: '0', isRepost: true }); 
+                  setMenuOpen(false);
+                  }}>
+
+                  Repost Over Post
                 </button>
               )}
 

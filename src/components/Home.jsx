@@ -18,13 +18,14 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  const fetchAllPosts = async () => {
+ const fetchAllPosts = async () => {
     try {
       const postsResponse = await fetch(
         "https://mern-backend-two-mu.vercel.app/posts",
         {
           method: "GET",
-          credentials: "include",
+          // This line is CRITICAL for sending the authentication cookie
+          credentials: "include", 
         }
       );
 
@@ -36,6 +37,45 @@ const Home = () => {
       console.error("Failed to fetch posts:", error);
     }
   };
+
+   // 🔑 NEW FUNCTION: Fetch user details to set state after refresh
+  const fetchUserData = async () => {
+      try {
+          setLoading(true);
+          // Use the now-fixed endpoint
+          const userResponse = await fetch("https://mern-backend-two-mu.vercel.app/user", {
+              method: "GET",
+              credentials: "include", // CRITICAL to send the cookie
+          });
+
+          if (userResponse.ok) {
+              const userData = await userResponse.json();
+              setUser(userData);
+          } else {
+              // User not logged in (401), set to null
+              setUser(null);
+          }
+      } catch (error) {
+          console.error("Error fetching user data:", error);
+          setUser(null);
+      } finally {
+          setLoading(false); // Set loading to false once user status is determined
+      }
+  };
+
+  // 🔑 UPDATED useEffects:
+  useEffect(() => {
+      fetchUserData();
+  }, []); // 1. Run only on mount to load user data
+
+
+  useEffect(() => {
+      // 2. Only fetch posts if the initial loading (for user data) is complete.
+      if (!loading) {
+          fetchAllPosts();
+      }
+  }, [loading]); // Fetch posts only after the loading state is resolved.
+
 
   const fetchBookmarkedPosts = async () => {
     try {
@@ -119,7 +159,7 @@ const Home = () => {
     }
   };
 
-  const handlePostSubmit = async () => {
+  const handlePostSubmit = async (statusCode) => {
     if (!postContent.trim()) {
       alert("Post content cannot be empty.");
       return;
@@ -140,7 +180,7 @@ const Home = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content: postContent }),
+          body: JSON.stringify({ content: postContent , statusCode: statusCode }),
         }
       );
 
@@ -184,6 +224,10 @@ const Home = () => {
   };
 
   const handleEditPost = (post) => {
+     if (post.statusCode === '3' && !post.isRepost) { 
+        alert("Withdrawn posts cannot be edited.");
+        return;
+    }
     setEditingPost(post);
     setPostContent(post.content);
     setIsEditPopupOpen(true);
@@ -325,6 +369,40 @@ const Home = () => {
     setIsBookmarksView(false);
     fetchAllPosts();
   };
+
+
+const handleWithdrawPost = async (postId) => {
+    if (window.confirm("Are you sure you want to withdraw this post? It will no longer be visible as 'Published' but will remain online with a withdrawal watermark.")) {
+      try {
+        const response = await fetch(
+          `https://mern-backend-two-mu.vercel.app/posts/${postId}/withdraw`,
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (response.ok) {
+          const updatedPost = await response.json();
+          // Update the local state with the new post (statusCode: '3')
+          setPosts(
+            posts.map((p) => (p._id === updatedPost._id ? updatedPost : p))
+          );
+          alert("Post successfully withdrawn!");
+        } else {
+          const errorData = await response.json();
+          alert(errorData.message || "Failed to withdraw post. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error withdrawing post:", error);
+        alert("An error occurred while withdrawing the post.");
+      }
+    }
+  };
+
 
   if (loading) {
     return (
@@ -495,9 +573,11 @@ const Home = () => {
           </button>
           {menuOpen && (
             <div className="absolute text-center right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" className=" ml-3.5 h-10 w-5.5 absolute" viewBox="0 0 640 640"><path d="M256.1 312C322.4 312 376.1 258.3 376.1 192C376.1 125.7 322.4 72 256.1 72C189.8 72 136.1 125.7 136.1 192C136.1 258.3 189.8 312 256.1 312zM226.4 368C127.9 368 48.1 447.8 48.1 546.3C48.1 562.7 61.4 576 77.8 576L274.3 576L285.2 521.5C289.5 499.8 300.2 479.9 315.8 464.3L383.1 397C355.1 378.7 321.7 368.1 285.7 368.1L226.3 368.1zM332.3 530.9L320.4 590.5C320.2 591.4 320.1 592.4 320.1 593.4C320.1 601.4 326.6 608 334.7 608C335.7 608 336.6 607.9 337.6 607.7L397.2 595.8C409.6 593.3 421 587.2 429.9 578.3L548.8 459.4L468.8 379.4L349.9 498.3C341 507.2 334.9 518.6 332.4 531zM600.1 407.9C622.2 385.8 622.2 350 600.1 327.9C578 305.8 542.2 305.8 520.1 327.9L491.3 356.7L571.3 436.7L600.1 407.9z"/></svg>
               <button
                 className="block w-full px-4 py-2 hover:bg-gray-100"
-                onClick={() => {
+                onClick={() => { 
                   setMenuOpen(false);
                   navigate("/edit-profile");
                 }}
@@ -505,13 +585,14 @@ const Home = () => {
                 Edit Profile
               </button>
 
+                <svg xmlns="http://www.w3.org/2000/svg" className=" ml-3.5 h-10 w-5.5 absolute" viewBox="0 0 640 640"><path d="M192 64C156.7 64 128 92.7 128 128L128 544C128 555.5 134.2 566.2 144.2 571.8C154.2 577.4 166.5 577.3 176.4 571.4L320 485.3L463.5 571.4C473.4 577.3 485.7 577.5 495.7 571.8C505.7 566.1 512 555.5 512 544L512 128C512 92.7 483.3 64 448 64L192 64z"/></svg>
               <button
                 className="block w-full  px-4 py-2 hover:bg-gray-100"
                 onClick={handleViewBookmarks}
               >
                 Bookmarks
               </button>
-              <svg xmlns="http://www.w3.org/2000/svg" className=" text-red-500 ml-5 h-10 w-6 absolute" fill="currentColor" viewBox="0 0 640 640"><path d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" className=" text-red-500 ml-4 h-10 w-6 absolute" fill="currentColor" viewBox="0 0 640 640"><path d="M224 160C241.7 160 256 145.7 256 128C256 110.3 241.7 96 224 96L160 96C107 96 64 139 64 192L64 448C64 501 107 544 160 544L224 544C241.7 544 256 529.7 256 512C256 494.3 241.7 480 224 480L160 480C142.3 480 128 465.7 128 448L128 192C128 174.3 142.3 160 160 160L224 160zM566.6 342.6C579.1 330.1 579.1 309.8 566.6 297.3L438.6 169.3C426.1 156.8 405.8 156.8 393.3 169.3C380.8 181.8 380.8 202.1 393.3 214.6L466.7 288L256 288C238.3 288 224 302.3 224 320C224 337.7 238.3 352 256 352L466.7 352L393.3 425.4C380.8 437.9 380.8 458.2 393.3 470.7C405.8 483.2 426.1 483.2 438.6 470.7L566.6 342.7z"/></svg>
               <button
                 className="block w-full  px-4 py-2 text-red-600 hover:bg-gray-100"
                 onClick={async () => {
@@ -530,8 +611,7 @@ const Home = () => {
           )}
         </div>
 
-        {/* Create Post Popup */}
-        {isPopupOpen && (
+          {isPopupOpen && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
               <div className="flex justify-between items-center mb-4">
@@ -551,7 +631,7 @@ const Home = () => {
               ></textarea>
               <div className="flex items-center space-x-4 mb-4">
                 <label className="flex items-center px-4 py-2 border rounded cursor-pointer hover:bg-gray-100 transition">
-                  <span className="mr-2">萄</span>
+                  
                   <span>Photos</span>
                   <input
                     type="file"
@@ -561,7 +641,7 @@ const Home = () => {
                   />
                 </label>
                 <label className="flex items-center px-4 py-2 border rounded cursor-pointer hover:bg-gray-100 transition">
-                  <span className="mr-2">道</span>
+                  {/* <span className="mr-2">道</span> */}
                   <span>Videos</span>
                   <input
                     type="file"
@@ -571,16 +651,25 @@ const Home = () => {
                   />
                 </label>
               </div>
-              <button
-                className="w-full py-2 bg-blue-500 text-white rounded font-bold hover:bg-blue-600 transition"
-                onClick={handlePostSubmit}
-              >
-                Post
-              </button>
+              {/* MODIFIED: Replaced single button with two options */}
+              <div className="flex justify-end space-x-2">
+                <button
+                  className="px-4 py-2 bg-gray-600 text-white rounded font-bold hover:bg-gray-700 transition"
+                  onClick={() => handlePostSubmit('0')} // '0' for Draft
+                >
+                  Save as Draft
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded font-bold hover:bg-blue-600 transition"
+                  onClick={() => handlePostSubmit('1')} // '1' for Publish
+                >
+                  Publish
+                </button>
+              </div>
             </div>
           </div>
         )}
-
+        
         {/* Edit Post Popup */}
         {isEditPopupOpen && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
@@ -658,6 +747,7 @@ const Home = () => {
                 onDelete={handleDeletePost}
                 onEdit={handleEditPost}
                 onBookmark={handleBookmarkPost}
+                onWithdraw={handleWithdrawPost}
                 isAuthor={user && post.author && post.author._id === user._id}
                 isBookmarked={bookmarkedPosts.some(
                   (bookmark) => bookmark._id === post._id
