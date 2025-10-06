@@ -3,10 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 
-
-
-
-
 const UserProfile = () => {
   const [user, setUser] = useState(null);
   const [userPosts, setUserPosts] = useState([]); // New state for posts
@@ -140,28 +136,7 @@ const UserProfile = () => {
         )}
 
 
-        {userPosts.length > 0 ? (
-            userPosts.map((post) => (
-                <Post
-                    key={post._id}
-                    post={post}
-                    onShare={handleShare}
-                            onBookmark={handleBookmarkPost}
-                            onDelete={null} // Don't show delete button
-                            onEdit={null}   // Don't show edit button
-                            isAuthor={false} // User is not viewing their own profile in this context
-                            isBookmarked={bookmarkedPosts.some(
-                  (bookmark) => bookmark._id === post._id
-                )}
-                        />
-                    ))
-                ) : (
-                    <div className="text-center p-10 bg-gray-100 rounded-lg">
-                        <p className="text-gray-500">
-                            This user hasn't created any posts yet.
-                        </p>
-                    </div>
-                )}
+       
       </div>
     </div>
   );
