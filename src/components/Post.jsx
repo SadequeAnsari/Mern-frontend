@@ -87,16 +87,20 @@ const isPending = post.statusCode === '1';
 
   
   const canDelete = canAuthorDelete || canAdminDeleteOthers;
+  // const canDelete = (isAuthor && (post.statusCode === '0' || post.statusCode === '1')) || (hasAdminRights && !isWithdrawn);
 
 
-  const canEdit = isAuthor && post.statusCode === '0' && !isWithdrawn;
+  // const canEdit = isAuthor && post.statusCode === '0';
+  const canEdit = isAuthor && (post.statusCode === '0' || post.statusCode === '1');
+
 
   const canWithdraw = isAuthor && isPublished; 
 
   const canRepost = isAuthor && isWithdrawn;
 
   const showReportOption = !isAuthor && parseInt(userLevel) >= 1;
-  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || canWithdraw || showReportOption); 
+  
+  const showThreeDots = userLevel !== "0" && (canEdit || canDelete || canWithdraw || canRepost || showReportOption); 
 
 
  const handleReportPost = () => {
@@ -231,7 +235,7 @@ const isPending = post.statusCode === '1';
               </svg>
             </button>
             {menuOpen && (
-      <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-10">
+      <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow-lg z-20">
               
               {/* Option for Author (Edit) - shown if NOT published */}
               {canEdit && (

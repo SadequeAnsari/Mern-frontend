@@ -73,6 +73,7 @@ const Home = () => {
       // 2. Only fetch posts if the initial loading (for user data) is complete.
       if (!loading) {
           fetchAllPosts();
+          fetchBookmarkedPosts();
       }
   }, [loading]); // Fetch posts only after the loading state is resolved.
 
@@ -123,7 +124,7 @@ const Home = () => {
       }
     };
     fetchProfileAndPosts();
-  }, [navigate]);
+  });
 
   useEffect(() => {
     if (!loading && !user) {
@@ -223,16 +224,36 @@ const Home = () => {
     }
   };
 
+  // const handleEditPost = (post) => {
+  //    if (post.statusCode === '3' && !post.isRepost) { 
+  //       alert("Withdrawn posts cannot be edited.");
+  //       return;
+  //   }
+  //   setEditingPost(post);
+  //   setPostContent(post.content);
+  //   setIsEditPopupOpen(true);
+  // };
+
+
+
   const handleEditPost = (post) => {
-     if (post.statusCode === '3' && !post.isRepost) { 
+    // FIX: Block editing a withdrawn post (statusCode '3') UNLESS it's a repost attempt.
+    // The repost action passes a modified post object where post.statusCode is '0' and post.isRepost is true.
+    // We only need to guard against a standard edit attempt on a *truly* withdrawn post.
+
+    // This check is slightly complex due to the way Repost works, but necessary.
+    // If the original post status is '3' (withdrawn) AND the special 'isRepost' flag is NOT present, block it.
+    if (post.statusCode === '3' && !post.isRepost) { 
         alert("Withdrawn posts cannot be edited.");
         return;
     }
+
     setEditingPost(post);
-    setPostContent(post.content);
+    setPostContent(post.content); 
     setIsEditPopupOpen(true);
   };
 
+  
   const handleEditPostSubmit = async () => {
     if (!postContent.trim()) {
       alert("Post content cannot be empty.");
